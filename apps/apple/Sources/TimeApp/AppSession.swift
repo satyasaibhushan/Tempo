@@ -19,10 +19,6 @@ final class AppSession {
 
     @ObservationIgnored
     private let client: ConvexClientWithAuth<Credentials>
-#if !os(macOS)
-    @ObservationIgnored
-    private let credentialsManager = CredentialsManager(authentication: Auth0.authentication())
-#endif
     @ObservationIgnored
     private var didRestore = false
 
@@ -42,26 +38,12 @@ final class AppSession {
         guard !didRestore else { return }
         didRestore = true
 
-#if os(macOS)
-        phase = .signedOut
-#else
-        let credentialsManager = credentialsManager
-        let hasCachedSession = await Task.detached {
-            credentialsManager.hasValid() || credentialsManager.canRenew()
-        }.value
-
-        guard hasCachedSession else {
-            phase = .signedOut
-            return
-        }
-
         switch await client.loginFromCache() {
         case .success:
             await activateAuthenticatedSession()
         case .failure:
             phase = .signedOut
         }
-#endif
     }
 
     func login() async {
@@ -78,9 +60,6 @@ final class AppSession {
     }
 
     func logout() async {
-#if !os(macOS)
-        _ = credentialsManager.clear()
-#endif
         timerStore = nil
         errorMessage = nil
         phase = .signedOut

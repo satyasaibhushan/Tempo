@@ -26,6 +26,11 @@ struct MacAppRootView: View {
         .task {
             await session.restoreIfNeeded()
         }
+        .onOpenURL { url in
+            if url.scheme == "fun.bhushan.time", url.host == "now" {
+                destination = .now
+            }
+        }
     }
 
     private func authenticatedApp(store: ConvexTimerStore) -> some View {

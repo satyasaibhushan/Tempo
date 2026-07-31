@@ -1,16 +1,42 @@
 import Foundation
 
 public enum WidgetSummaryCalculator {
+    public static func oldestRelevantDate(
+        now: Date = .now,
+        calendar: Calendar = .autoupdatingCurrent,
+        weekStart: WeekStart? = nil
+    ) -> Date {
+        let startOfMonth = calendar.dateInterval(of: .month, for: now)?.start
+            ?? calendar.startOfDay(for: now)
+        return min(startOfMonth, startOfWeek(containing: now, calendar: calendar, weekStart: weekStart))
+    }
+
     public static func summary(
         for records: [WidgetEntryRecord],
+        activeTimers: [WidgetTimerSnapshot] = [],
         range: WidgetRange,
         folderId: DocumentID? = nil,
         labelId: DocumentID? = nil,
         now: Date = .now,
-        calendar: Calendar = .autoupdatingCurrent
+        calendar: Calendar = .autoupdatingCurrent,
+        weekStart: WeekStart? = nil
     ) -> WidgetSummary {
-        let intervals = bucketIntervals(for: range, now: now, calendar: calendar)
-        let filteredRecords = records.filter { record in
+        let intervals = bucketIntervals(
+            for: range,
+            now: now,
+            calendar: calendar,
+            weekStart: weekStart
+        )
+        let activeRecords = activeTimers.map {
+            WidgetEntryRecord(
+                id: $0.id,
+                startedAt: $0.startedAt ?? $0.timerStartDate,
+                durationSeconds: $0.elapsedSeconds(at: now),
+                folderId: $0.folderId,
+                labelIds: $0.labelIds ?? []
+            )
+        }
+        let filteredRecords = (records + activeRecords).filter { record in
             let matchesFolder: Bool
             if folderId == WidgetSnapshotStore.inboxFilterIdentifier {
                 matchesFolder = record.folderId == nil
@@ -46,7 +72,8 @@ public enum WidgetSummaryCalculator {
     private static func bucketIntervals(
         for range: WidgetRange,
         now: Date,
-        calendar: Calendar
+        calendar: Calendar,
+        weekStart: WeekStart?
     ) -> [(range: Range<Date>, label: String)] {
         switch range {
         case .day:
@@ -62,14 +89,12 @@ public enum WidgetSummaryCalculator {
                 return (lower..<upper, lower.formatted(.dateTime.hour(.defaultDigits(amPM: .abbreviated))))
             }
         case .week:
-            guard let week = calendar.dateInterval(of: .weekOfYear, for: now) else {
-                return []
-            }
+            let start = startOfWeek(containing: now, calendar: calendar, weekStart: weekStart)
 
             return (0..<7).compactMap { index in
                 guard
-                    let lower = calendar.date(byAdding: .day, value: index, to: week.start),
-                    let upper = calendar.date(byAdding: .day, value: index + 1, to: week.start)
+                    let lower = calendar.date(byAdding: .day, value: index, to: start),
+                    let upper = calendar.date(byAdding: .day, value: index + 1, to: start)
                 else {
                     return nil
                 }
@@ -98,5 +123,17 @@ public enum WidgetSummaryCalculator {
 
             return intervals
         }
+    }
+
+    private static func startOfWeek(
+        containing date: Date,
+        calendar: Calendar,
+        weekStart: WeekStart?
+    ) -> Date {
+        let startOfDay = calendar.startOfDay(for: date)
+        let weekday = calendar.component(.weekday, from: startOfDay)
+        let mondayOffset = (weekday + 5) % 7
+        let offset = weekStart == .sunday ? weekday - 1 : mondayOffset
+        return calendar.date(byAdding: .day, value: -offset, to: startOfDay) ?? startOfDay
     }
 }

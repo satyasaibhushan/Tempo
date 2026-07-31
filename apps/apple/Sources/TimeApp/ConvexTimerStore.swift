@@ -21,6 +21,10 @@ final class ConvexTimerStore {
     private let client: ConvexClient
     @ObservationIgnored
     private var subscriptions: Set<AnyCancellable> = []
+    @ObservationIgnored
+    private var loadedWidgetSources: Set<WidgetSource> = []
+    @ObservationIgnored
+    private var widgetPublicationTask: Task<Void, Never>?
 
     init(client: ConvexClient) {
         self.client = client
@@ -294,55 +298,71 @@ final class ConvexTimerStore {
 
     private func subscribeToBackend() {
         subscribe(
+            source: .profile,
             client.subscribe(
                 to: ConvexAPI.Users.current,
                 yielding: UserProfile?.self
             )
         ) { store, profile in
+            guard store.profile != profile else { return false }
             store.profile = profile
+            return true
         }
 
         subscribe(
+            source: .timers,
             client.subscribe(
                 to: ConvexAPI.TimeEntries.listActive,
                 yielding: [TimeEntry].self
             )
         ) { store, timers in
+            guard store.timers != timers else { return false }
             store.timers = timers
+            return true
         }
 
         subscribe(
+            source: .entries,
             client.subscribe(
                 to: ConvexAPI.TimeEntries.listRecent,
                 with: ["limit": 1_000.0],
                 yielding: [TimeEntry].self
             )
         ) { store, entries in
+            guard store.completedEntries != entries else { return false }
             store.completedEntries = entries
+            return true
         }
 
         subscribe(
+            source: .folders,
             client.subscribe(
                 to: ConvexAPI.Folders.listAll,
                 yielding: [Folder].self
             )
         ) { store, folders in
+            guard store.folders != folders else { return false }
             store.folders = folders
+            return true
         }
 
         subscribe(
+            source: .labels,
             client.subscribe(
                 to: ConvexAPI.Labels.list,
                 yielding: [TimeCore.Label].self
             )
         ) { store, labels in
+            guard store.labels != labels else { return false }
             store.labels = labels
+            return true
         }
     }
 
     private func subscribe<Value>(
+        source: WidgetSource,
         _ publisher: AnyPublisher<Value, ClientError>,
-        apply: @escaping (ConvexTimerStore, Value) -> Void
+        apply: @escaping (ConvexTimerStore, Value) -> Bool
     ) {
         publisher
             .receive(on: DispatchQueue.main)
@@ -353,8 +373,13 @@ final class ConvexTimerStore {
                 },
                 receiveValue: { [weak self] value in
                     guard let self else { return }
-                    apply(self, value)
-                    self.publishWidgetSnapshot()
+                    let changed = apply(self, value)
+                    let becameReady = self.loadedWidgetSources.insert(source).inserted
+                        && self.loadedWidgetSources.count == WidgetSource.allCases.count
+                    guard self.loadedWidgetSources.count == WidgetSource.allCases.count else { return }
+                    if changed || becameReady {
+                        self.scheduleWidgetSnapshotPublication()
+                    }
                 }
             )
             .store(in: &subscriptions)
@@ -405,7 +430,27 @@ final class ConvexTimerStore {
         }
     }
 
-    private func publishWidgetSnapshot(now: Date = .now) {
+    private func scheduleWidgetSnapshotPublication() {
+        widgetPublicationTask?.cancel()
+        widgetPublicationTask = Task { [weak self] in
+            do {
+                try await Task.sleep(for: .milliseconds(250))
+            } catch {
+                return
+            }
+
+            guard let self else { return }
+            let snapshot = self.makeWidgetSnapshot()
+            let result = await Task.detached(priority: .utility) {
+                WidgetSnapshotStore.saveIfChanged(snapshot)
+            }.value
+
+            guard !Task.isCancelled, result == .saved else { return }
+            WidgetCenter.shared.reloadAllTimelines()
+        }
+    }
+
+    private func makeWidgetSnapshot(now: Date = .now) -> WidgetSnapshot {
         let nowMilliseconds = Int64((now.timeIntervalSince1970 * 1_000).rounded(.down))
         let foldersById = Dictionary(uniqueKeysWithValues: folders.map { ($0.id, $0) })
         let activeSnapshots = timers.map { timer in
@@ -413,16 +458,27 @@ final class ConvexTimerStore {
                 id: timer.id,
                 title: timer.title,
                 folderName: timer.folderId.flatMap { foldersById[$0]?.name } ?? "Inbox",
+                startedAt: Date(timeIntervalSince1970: TimeInterval(timer.startedAt) / 1_000),
+                folderId: timer.folderId,
+                labelIds: effectiveLabelIds(for: timer, foldersById: foldersById),
                 status: timer.status,
                 elapsedSeconds: TimerMath.elapsedSeconds(for: timer, at: nowMilliseconds),
                 capturedAt: now
             )
         }
+        let oldestRelevantDate = WidgetSummaryCalculator.oldestRelevantDate(
+            now: now,
+            weekStart: profile?.weekStart
+        )
         let records = completedEntries.compactMap { entry -> WidgetEntryRecord? in
             guard let durationSeconds = entry.durationSeconds else { return nil }
+            let startedAt = Date(timeIntervalSince1970: TimeInterval(entry.startedAt) / 1_000)
+            guard startedAt.addingTimeInterval(TimeInterval(durationSeconds)) > oldestRelevantDate else {
+                return nil
+            }
             return WidgetEntryRecord(
                 id: entry.id,
-                startedAt: Date(timeIntervalSince1970: TimeInterval(entry.startedAt) / 1_000),
+                startedAt: startedAt,
                 durationSeconds: durationSeconds,
                 folderId: entry.folderId,
                 labelIds: effectiveLabelIds(for: entry, foldersById: foldersById)
@@ -440,12 +496,10 @@ final class ConvexTimerStore {
             ] + folders.filter { !$0.archived }.map {
                 WidgetFilterOption(id: $0.id, name: $0.name)
             },
-            labels: labels.map { WidgetFilterOption(id: $0.id, name: $0.name) }
+            labels: labels.map { WidgetFilterOption(id: $0.id, name: $0.name) },
+            weekStart: profile?.weekStart
         )
-
-        if WidgetSnapshotStore.save(snapshot) {
-            WidgetCenter.shared.reloadAllTimelines()
-        }
+        return snapshot
     }
 
     private func effectiveLabelIds(
@@ -454,14 +508,27 @@ final class ConvexTimerStore {
     ) -> [DocumentID] {
         var result = Set(entry.manualLabelIds)
         var folderId = entry.folderId
+        var visited: Set<DocumentID> = []
 
-        while let currentId = folderId, let folder = foldersById[currentId] {
+        while
+            let currentId = folderId,
+            visited.insert(currentId).inserted,
+            let folder = foldersById[currentId]
+        {
             result.formUnion(folder.defaultLabelIds)
             folderId = folder.parentFolderId
         }
 
-        return Array(result)
+        return result.sorted()
     }
+}
+
+private enum WidgetSource: CaseIterable {
+    case profile
+    case timers
+    case entries
+    case folders
+    case labels
 }
 
 private func convexIds<S: Sequence>(_ ids: S) -> [ConvexEncodable?]

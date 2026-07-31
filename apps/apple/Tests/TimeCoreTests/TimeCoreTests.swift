@@ -16,6 +16,35 @@ import Testing
     #expect(TimerMath.nextWholeSecondBoundary(after: lateViewPhase) == expectedBoundary)
 }
 
+@Test func widgetTimerUsesTheSharedWallClockSecond() {
+    let timer = WidgetTimerSnapshot(
+        id: "timer-1",
+        title: "Focused work",
+        status: .running,
+        elapsedSeconds: 11,
+        capturedAt: Date(timeIntervalSince1970: 12.875)
+    )
+
+    #expect(timer.timerStartDate == Date(timeIntervalSince1970: 1))
+    #expect(timer.elapsedSeconds(at: Date(timeIntervalSince1970: 13.1)) == 12)
+}
+
+@Test func widgetDurationMatchesTheAppClockFormat() {
+    #expect(WidgetTimeText.duration(80) == "00:01:20")
+}
+
+@Test func pausedWidgetTimerDoesNotAdvance() {
+    let timer = WidgetTimerSnapshot(
+        id: "timer-1",
+        title: "Paused work",
+        status: .paused,
+        elapsedSeconds: 11,
+        capturedAt: Date(timeIntervalSince1970: 12.875)
+    )
+
+    #expect(timer.elapsedSeconds(at: Date(timeIntervalSince1970: 100)) == 11)
+}
+
 @Test func runningSegmentsAdvanceFromTheSameSecond() {
     let now: Int64 = 25_999
     let first = [TimeSegment(startTime: 1_000)]
@@ -192,4 +221,179 @@ import Testing
     )
 
     #expect(summary.totalSeconds == 1_800)
+}
+
+@Test func widgetWeekSummaryIncludesTheMatchingRunningTimer() throws {
+    var calendar = Calendar(identifier: .gregorian)
+    calendar.timeZone = try #require(TimeZone(secondsFromGMT: 0))
+    let now = try #require(
+        calendar.date(from: DateComponents(year: 2026, month: 7, day: 13, hour: 17))
+    )
+    let timer = WidgetTimerSnapshot(
+        id: "timer-1",
+        title: "Focused work",
+        startedAt: now.addingTimeInterval(-12),
+        folderId: "work",
+        labelIds: ["focus"],
+        status: .running,
+        elapsedSeconds: 11,
+        capturedAt: now.addingTimeInterval(-1)
+    )
+
+    let summary = WidgetSummaryCalculator.summary(
+        for: [],
+        activeTimers: [timer],
+        range: .week,
+        folderId: "work",
+        labelId: "focus",
+        now: now,
+        calendar: calendar,
+        weekStart: .monday
+    )
+
+    #expect(summary.totalSeconds == 12)
+    #expect(summary.buckets.map(\.durationSeconds) == [12, 0, 0, 0, 0, 0, 0])
+}
+
+@Test func widgetSnapshotLoadsFromFallbackPreferences() throws {
+    let primarySuiteName = "fun.bhushan.time.tests.primary.\(UUID().uuidString)"
+    let fallbackSuiteName = "fun.bhushan.time.tests.fallback.\(UUID().uuidString)"
+    defer {
+        UserDefaults.standard.removePersistentDomain(forName: primarySuiteName)
+        UserDefaults.standard.removePersistentDomain(forName: fallbackSuiteName)
+    }
+
+    let snapshot = WidgetSnapshot(
+        capturedAt: Date(timeIntervalSince1970: 1_000),
+        folders: [WidgetFilterOption(id: "work", name: "Work")],
+        labels: [WidgetFilterOption(id: "focus", name: "Focus")]
+    )
+
+    #expect(
+        WidgetSnapshotStore.save(
+            snapshot,
+            primarySuiteName: primarySuiteName,
+            fallbackSuiteName: fallbackSuiteName
+        )
+    )
+    UserDefaults.standard.removePersistentDomain(forName: primarySuiteName)
+
+    #expect(
+        WidgetSnapshotStore.load(
+            primarySuiteName: primarySuiteName,
+            fallbackSuiteName: fallbackSuiteName
+        ) == snapshot
+    )
+}
+
+@Test func equivalentLiveWidgetSnapshotsDoNotRequireAnotherReload() {
+    let firstCapture = Date(timeIntervalSince1970: 100)
+    let first = WidgetSnapshot(
+        capturedAt: firstCapture,
+        activeTimers: [
+            WidgetTimerSnapshot(
+                id: "timer-1",
+                title: "Focused work",
+                startedAt: Date(timeIntervalSince1970: 10),
+                status: .running,
+                elapsedSeconds: 40,
+                capturedAt: firstCapture
+            ),
+        ]
+    )
+    let laterCapture = firstCapture.addingTimeInterval(10)
+    let equivalent = WidgetSnapshot(
+        capturedAt: laterCapture,
+        activeTimers: [
+            WidgetTimerSnapshot(
+                id: "timer-1",
+                title: "Focused work",
+                startedAt: Date(timeIntervalSince1970: 10),
+                status: .running,
+                elapsedSeconds: 50,
+                capturedAt: laterCapture
+            ),
+        ]
+    )
+    let paused = WidgetSnapshot(
+        capturedAt: laterCapture,
+        activeTimers: [
+            WidgetTimerSnapshot(
+                id: "timer-1",
+                title: "Focused work",
+                startedAt: Date(timeIntervalSince1970: 10),
+                status: .paused,
+                elapsedSeconds: 50,
+                capturedAt: laterCapture
+            ),
+        ]
+    )
+
+    #expect(first.hasSameWidgetContent(as: equivalent))
+    #expect(!first.hasSameWidgetContent(as: paused))
+}
+
+@Test func widgetStoreSkipsEquivalentLiveSnapshotWrites() {
+    let suiteName = "fun.bhushan.time.tests.unchanged.\(UUID().uuidString)"
+    defer { UserDefaults.standard.removePersistentDomain(forName: suiteName) }
+
+    let firstCapture = Date(timeIntervalSince1970: 100)
+    let first = WidgetSnapshot(
+        capturedAt: firstCapture,
+        activeTimers: [
+            WidgetTimerSnapshot(
+                id: "timer-1",
+                title: "Focused work",
+                status: .running,
+                elapsedSeconds: 40,
+                capturedAt: firstCapture
+            ),
+        ]
+    )
+    let laterCapture = firstCapture.addingTimeInterval(10)
+    let equivalent = WidgetSnapshot(
+        capturedAt: laterCapture,
+        activeTimers: [
+            WidgetTimerSnapshot(
+                id: "timer-1",
+                title: "Focused work",
+                status: .running,
+                elapsedSeconds: 50,
+                capturedAt: laterCapture
+            ),
+        ]
+    )
+
+    #expect(WidgetSnapshotStore.saveIfChanged(first, suiteName: suiteName) == .saved)
+    #expect(WidgetSnapshotStore.saveIfChanged(equivalent, suiteName: suiteName) == .unchanged)
+    #expect(WidgetSnapshotStore.load(suiteName: suiteName) == first)
+}
+
+@Test func widgetHistoryStartsAtTheEarliestVisibleRange() throws {
+    var calendar = Calendar(identifier: .gregorian)
+    calendar.timeZone = try #require(TimeZone(secondsFromGMT: 0))
+    let now = try #require(
+        calendar.date(from: DateComponents(year: 2026, month: 8, day: 1, hour: 12))
+    )
+    let expectedMondayStart = try #require(
+        calendar.date(from: DateComponents(year: 2026, month: 7, day: 27))
+    )
+    let expectedSundayStart = try #require(
+        calendar.date(from: DateComponents(year: 2026, month: 7, day: 26))
+    )
+
+    #expect(
+        WidgetSummaryCalculator.oldestRelevantDate(
+            now: now,
+            calendar: calendar,
+            weekStart: .monday
+        ) == expectedMondayStart
+    )
+    #expect(
+        WidgetSummaryCalculator.oldestRelevantDate(
+            now: now,
+            calendar: calendar,
+            weekStart: .sunday
+        ) == expectedSundayStart
+    )
 }

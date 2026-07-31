@@ -40,6 +40,7 @@ struct CurrentTimerProvider: TimelineProvider {
 }
 
 struct CurrentTimerWidgetView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.widgetFamily) private var family
     let entry: CurrentTimerEntry
 
@@ -57,8 +58,9 @@ struct CurrentTimerWidgetView: View {
             }
         }
         .containerBackground(for: .widget) {
-            WidgetPalette.timerSurface
+            WidgetPalette.timerSurface(for: colorScheme)
         }
+        .widgetURL(TempoWidgetURL.now)
     }
 
     private func homeScreenTimer(_ timer: WidgetTimerSnapshot) -> some View {
@@ -102,12 +104,8 @@ struct CurrentTimerWidgetView: View {
         }
     }
 
-    private func liveTimer(_ timer: WidgetTimerSnapshot) -> Text {
-        Text(
-            timerInterval: timer.timerStartDate...Date.distantFuture,
-            countsDown: false,
-            showsHours: true
-        )
+    private func liveTimer(_ timer: WidgetTimerSnapshot) -> some View {
+        ExactLiveTimerText(timer: timer)
     }
 
     private var emptyState: some View {

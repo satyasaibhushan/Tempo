@@ -6,5 +6,6 @@ struct TimeWidgetsBundle: WidgetBundle {
     var body: some Widget {
         CurrentTimerWidget()
         SummaryWidget()
+        LiveWeekWidget()
     }
 }
