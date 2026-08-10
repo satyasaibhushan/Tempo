@@ -7,6 +7,7 @@ import {
   ChevronUp,
   Loader2,
   Pause,
+  Pencil,
   Play,
   Square,
   Trash2,
@@ -21,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FolderPicker } from "./folder-picker";
 import { LabelPicker } from "./label-picker";
 import { TimerDisplay } from "./timer-display";
+import { ActiveTimerDialog } from "./active-timer-dialog";
 import { useTimerController, type ActiveTimer } from "./timer-controller";
 
 function ErrorNotice({
@@ -56,6 +58,8 @@ export function ActiveTimerCard({
   className?: string;
 }) {
   const { discard, pause, pendingAction, resume, stop } = useTimerController();
+  const [editing, setEditing] = useState(false);
+  const [editorMaximumStart, setEditorMaximumStart] = useState(timer.startedAt);
 
   const allLabels = useQuery(api.labels.listLabels, {});
   const allFolders = useQuery(api.folders.listAllFolders, {});
@@ -80,13 +84,14 @@ export function ActiveTimerCard({
   const labels = (allLabels ?? []).filter((label) => labelIds.has(label._id));
 
   return (
-    <section
-      className={cn(
-        "relative overflow-hidden rounded-3xl bg-[var(--terra-pine)] p-6 text-[var(--terra-hero-foreground)] md:p-8",
-        !isRunning && "bg-[var(--terra-pine-soft)]",
-        className,
-      )}
-    >
+    <>
+      <section
+        className={cn(
+          "relative overflow-hidden rounded-3xl bg-[var(--terra-pine)] p-6 text-[var(--terra-hero-foreground)] md:p-8",
+          !isRunning && "bg-[var(--terra-pine-soft)]",
+          className,
+        )}
+      >
       <div
         className="pointer-events-none absolute -right-16 -top-20 size-[300px] rounded-full"
         style={{
@@ -174,6 +179,19 @@ export function ActiveTimerCard({
           <Button
             variant="ghost"
             size="icon-lg"
+            onClick={() => {
+              setEditorMaximumStart(timer.segments[0]?.endTime ?? Date.now());
+              setEditing(true);
+            }}
+            disabled={isBusy || !timer.id}
+            className="rounded-full text-[var(--terra-hero-muted)] hover:bg-[#eef1e4]/10 hover:text-[var(--terra-hero-foreground)]"
+            title="Edit active timer"
+          >
+            <Pencil className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-lg"
             onClick={() => timer.id && void discard(timer.id)}
             disabled={isBusy || !timer.id}
             className="rounded-full text-[var(--terra-hero-muted)] hover:bg-[#eef1e4]/10 hover:text-[#e8b4a0]"
@@ -183,7 +201,16 @@ export function ActiveTimerCard({
           </Button>
         </div>
       </div>
-    </section>
+      </section>
+      {editing && (
+        <ActiveTimerDialog
+          open
+          onOpenChange={setEditing}
+          timer={timer}
+          maximumStart={editorMaximumStart}
+        />
+      )}
+    </>
   );
 }
 

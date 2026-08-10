@@ -12,6 +12,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import {
+  applyActiveTimerEdit,
   createOptimisticTimer,
   pauseOptimisticTimer,
   resumeOptimisticTimer,
@@ -39,8 +40,24 @@ export interface ContinueTimerInput {
   manualLabelIds: Id<"labels">[];
 }
 
+export interface EditActiveTimerInput {
+  id: Id<"timeEntries">;
+  title: string;
+  notes?: string;
+  folderId?: Id<"folders">;
+  manualLabelIds: Id<"labels">[];
+  startTime: number;
+}
+
 export interface PendingAction {
-  action: "start" | "continue" | "pause" | "resume" | "stop" | "discard";
+  action:
+    | "start"
+    | "continue"
+    | "edit"
+    | "pause"
+    | "resume"
+    | "stop"
+    | "discard";
   entryId?: Id<"timeEntries">;
 }
 
@@ -52,6 +69,7 @@ interface TimerControllerValue {
   clearError: () => void;
   start: (input: StartTimerInput) => Promise<boolean>;
   continueFrom: (input: ContinueTimerInput) => Promise<boolean>;
+  edit: (input: EditActiveTimerInput) => Promise<boolean>;
   pause: (entryId: Id<"timeEntries">) => Promise<boolean>;
   resume: (entryId: Id<"timeEntries">) => Promise<boolean>;
   stop: (entryId: Id<"timeEntries">) => Promise<boolean>;
@@ -76,6 +94,7 @@ export function TimerControllerProvider({
   const serverTimers = useQuery(api.timeEntries.listActiveTimers, {});
   const startMutation = useMutation(api.timeEntries.startTimer);
   const continueMutation = useMutation(api.timeEntries.continueEntry);
+  const editMutation = useMutation(api.timeEntries.editActiveTimer);
   const pauseMutation = useMutation(api.timeEntries.pauseTimer);
   const resumeMutation = useMutation(api.timeEntries.resumeTimer);
   const stopMutation = useMutation(api.timeEntries.stopTimer);
@@ -203,6 +222,30 @@ export function TimerControllerProvider({
     [activeTimers, clearOverride, pauseMutation, run, setOverride],
   );
 
+  const edit = useCallback(
+    async (input: EditActiveTimerInput) => {
+      const timer = activeTimers?.find((candidate) => candidate.id === input.id);
+      if (!timer) return false;
+
+      setOverride(input.id, applyActiveTimerEdit(timer, input) as ActiveTimer);
+      return run(
+        { action: "edit", entryId: input.id },
+        () =>
+          editMutation({
+            entryId: input.id,
+            title: input.title,
+            notes: input.notes ?? "",
+            folderId: input.folderId,
+            clearFolder: input.folderId === undefined,
+            manualLabelIds: input.manualLabelIds,
+            startTime: input.startTime,
+          }),
+        () => clearOverride(input.id),
+      );
+    },
+    [activeTimers, clearOverride, editMutation, run, setOverride],
+  );
+
   const resume = useCallback(
     async (entryId: Id<"timeEntries">) => {
       const timer = activeTimers?.find((t) => t.id === entryId);
@@ -252,6 +295,7 @@ export function TimerControllerProvider({
       clearError: () => setError(null),
       start,
       continueFrom,
+      edit,
       pause,
       resume,
       stop,
@@ -261,6 +305,7 @@ export function TimerControllerProvider({
       activeTimers,
       continueFrom,
       discard,
+      edit,
       error,
       pause,
       pendingAction,

@@ -7,6 +7,7 @@ struct TimerDashboardView: View {
     @State private var selectedFolderId: DocumentID?
     @State private var selectedLabelIds: Set<DocumentID> = []
     @State private var showingOptions = false
+    @State private var editingTimer: TimeEntry?
     @State private var timerTickAnchor = TimerMath.nextWholeSecondBoundary(after: .now)
 
     var body: some View {
@@ -34,6 +35,9 @@ struct TimerDashboardView: View {
                 Button("OK") { store.clearError() }
             } message: {
                 Text(store.errorMessage ?? "Please try again.")
+            }
+            .sheet(item: $editingTimer) { timer in
+                ActiveTimerEditorSheet(store: store, timer: timer)
             }
         }
     }
@@ -289,6 +293,7 @@ struct TimerDashboardView: View {
                             folderName: store.folder(for: timer.folderId)?.name ?? "Inbox",
                             labels: effectiveLabels(for: timer),
                             now: context.date,
+                            onEdit: { editingTimer = timer },
                             onToggle: { store.toggleTimer(timer) },
                             onStop: { store.stopTimer(timer) },
                             onDiscard: { store.discardTimer(timer) }
@@ -352,6 +357,7 @@ private struct TimerCard: View {
     let folderName: String
     let labels: [TimeCore.Label]
     let now: Date
+    let onEdit: () -> Void
     let onToggle: () -> Void
     let onStop: () -> Void
     let onDiscard: () -> Void
@@ -367,6 +373,7 @@ private struct TimerCard: View {
                     .tracking(1.2)
                 Spacer()
                 Menu {
+                    Button("Edit Timer", systemImage: "pencil", action: onEdit)
                     Button("Discard Timer", systemImage: "trash", role: .destructive, action: onDiscard)
                 } label: {
                     Image(systemName: "ellipsis")
@@ -410,6 +417,10 @@ private struct TimerCard: View {
                     }
                     .buttonStyle(SecondaryCapsuleButtonStyle())
                     #if os(macOS)
+                    Button(action: onEdit) {
+                        Image(systemName: "pencil")
+                    }
+                    .buttonStyle(HeroGhostButtonStyle())
                     Button(action: onStop) {
                         Label("Stop", systemImage: "stop.fill")
                     }
@@ -454,6 +465,88 @@ private struct TimerCard: View {
         #else
         50
         #endif
+    }
+}
+
+private struct ActiveTimerEditorSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Bindable var store: ConvexTimerStore
+    let timer: TimeEntry
+
+    @State private var title: String
+    @State private var notes: String
+    @State private var folderId: DocumentID?
+    @State private var labelIds: Set<DocumentID>
+    @State private var start: Date
+
+    init(store: ConvexTimerStore, timer: TimeEntry) {
+        self.store = store
+        self.timer = timer
+        _title = State(initialValue: timer.title)
+        _notes = State(initialValue: timer.notes ?? "")
+        _folderId = State(initialValue: timer.folderId)
+        _labelIds = State(initialValue: Set(timer.manualLabelIds))
+        _start = State(initialValue: Date(milliseconds: timer.startedAt))
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Timer") {
+                    TextField("What are you working on?", text: $title)
+                    TextField("Notes", text: $notes, axis: .vertical)
+                        .lineLimit(2...5)
+                }
+
+                Section("Started") {
+                    DatePicker("Start time", selection: $start, in: ...latestAllowedStart)
+                    Text("The clock keeps running; pause and resume history stays intact.")
+                        .font(.caption)
+                        .foregroundStyle(TimeTheme.sage)
+                }
+
+                Section("Folder") {
+                    FolderPicker(folders: store.activeFolders, selection: $folderId)
+                        .labelsHidden()
+                }
+
+                Section("Labels") {
+                    LabelSelectionList(labels: store.labels, selection: $labelIds)
+                }
+            }
+            .scrollContentBackground(.hidden)
+            .background(TimeTheme.canvas)
+            .navigationTitle("Edit Active Timer")
+            .timeInlineNavigationTitle()
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") { save() }
+                        .fontWeight(.bold)
+                        .disabled(start > latestAllowedStart || store.isMutating)
+                }
+            }
+        }
+    }
+
+    private var latestAllowedStart: Date {
+        timer.segments.first?.endTime.map(Date.init(milliseconds:)) ?? .now
+    }
+
+    private func save() {
+        Task {
+            let success = await store.editActiveTimer(
+                timer,
+                title: title,
+                notes: notes,
+                folderId: folderId,
+                labelIds: labelIds,
+                start: start
+            )
+            if success { dismiss() }
+        }
     }
 }
 

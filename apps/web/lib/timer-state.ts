@@ -23,6 +23,14 @@ export interface TimerDraft {
   manualLabelIds?: string[];
 }
 
+export interface ActiveTimerEdit {
+  title: string;
+  notes?: string;
+  folderId?: string;
+  manualLabelIds: string[];
+  startTime: number;
+}
+
 const SECOND_MS = 1_000;
 
 /** Drop sub-second precision so every timer shares wall-clock boundaries. */
@@ -66,6 +74,24 @@ export function createOptimisticTimer(
     status: "running",
     segments: [{ startTime }],
     startedAt: startTime,
+  };
+}
+
+export function applyActiveTimerEdit(
+  timer: TimerSnapshot,
+  edit: ActiveTimerEdit,
+): TimerSnapshot {
+  const startTime = toWholeSecond(edit.startTime);
+  return {
+    ...timer,
+    title: edit.title,
+    notes: edit.notes,
+    folderId: edit.folderId,
+    manualLabelIds: edit.manualLabelIds,
+    startedAt: startTime,
+    segments: timer.segments.map((segment, index) =>
+      index === 0 ? { ...segment, startTime } : segment,
+    ),
   };
 }
 

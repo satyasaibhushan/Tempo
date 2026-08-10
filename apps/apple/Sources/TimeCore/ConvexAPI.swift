@@ -11,6 +11,7 @@ public enum ConvexAPI {
         public static let listRecent = "timeEntries:listRecent"
         public static let listByDateRange = "timeEntries:listByDateRange"
         public static let start = "timeEntries:startTimer"
+        public static let editActive = "timeEntries:editActiveTimer"
         public static let pause = "timeEntries:pauseTimer"
         public static let resume = "timeEntries:resumeTimer"
         public static let stop = "timeEntries:stopTimer"

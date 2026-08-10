@@ -120,6 +120,29 @@ final class ConvexTimerStore {
         }
     }
 
+    func editActiveTimer(
+        _ timer: TimeEntry,
+        title: String,
+        notes: String,
+        folderId: DocumentID?,
+        labelIds: Set<DocumentID>,
+        start: Date
+    ) async -> Bool {
+        var args: [String: ConvexEncodable?] = [
+            "entryId": timer.id,
+            "title": title.trimmingCharacters(in: .whitespacesAndNewlines),
+            "notes": notes.trimmingCharacters(in: .whitespacesAndNewlines),
+            "manualLabelIds": convexIds(labelIds),
+            "startTime": Double(start.millisecondsSince1970),
+        ]
+        if let folderId {
+            args["folderId"] = folderId
+        } else {
+            args["clearFolder"] = true
+        }
+        return await performMutation(ConvexAPI.TimeEntries.editActive, args: consume args)
+    }
+
     func stopTimer(_ timer: TimeEntry) {
         mutate {
             let _: DocumentID = try await self.client.mutation(

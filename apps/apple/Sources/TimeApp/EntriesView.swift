@@ -55,21 +55,14 @@ struct EntriesView: View {
             .sheet(item: $editingEntry) { entry in
                 EntryEditorSheet(store: store, entry: entry)
             }
-            .confirmationDialog(
-                "Delete this entry?",
-                isPresented: Binding(
-                    get: { deletingEntry != nil },
-                    set: { if !$0 { deletingEntry = nil } }
-                ),
-                titleVisibility: .visible
-            ) {
-                Button("Delete Entry", role: .destructive) {
-                    guard let deletingEntry else { return }
-                    Task { _ = await store.deleteEntry(deletingEntry) }
-                    self.deletingEntry = nil
-                }
-            } message: {
-                Text("This permanently removes the recorded session.")
+            .sheet(item: $deletingEntry) { entry in
+                #if os(iOS)
+                EntryDeleteSheet(store: store, entry: entry)
+                    .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
+                #else
+                EntryDeleteSheet(store: store, entry: entry)
+                #endif
             }
         }
     }
@@ -797,6 +790,85 @@ private struct EntryRow: View {
             }
         }
         .terraSurface()
+    }
+}
+
+private struct EntryDeleteSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Bindable var store: ConvexTimerStore
+    let entry: TimeEntry
+    @State private var deleting = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 22) {
+            HStack(spacing: 10) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(TimeTheme.destructive)
+                Text("Delete time entry")
+                    .font(.headline)
+                    .foregroundStyle(TimeTheme.destructive)
+            }
+
+            Text("This entry will be permanently removed. This action cannot be undone.")
+                .font(.subheadline)
+                .foregroundStyle(TimeTheme.mutedInk)
+                .fixedSize(horizontal: false, vertical: true)
+
+            HStack(spacing: 14) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(entry.title.isEmpty ? "Untitled" : entry.title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(TimeTheme.ink)
+                        .lineLimit(1)
+                    Text(Date(milliseconds: entry.startedAt).formatted(date: .abbreviated, time: .shortened))
+                        .font(.caption)
+                        .foregroundStyle(TimeTheme.sage)
+                }
+                Spacer()
+                Text(TimeText.duration(entry.durationSeconds ?? 0))
+                    .font(.subheadline.monospacedDigit())
+                    .foregroundStyle(TimeTheme.sage)
+            }
+            .padding(16)
+            .background(TimeTheme.muted, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(TimeTheme.line, lineWidth: 1)
+            }
+
+            HStack(spacing: 12) {
+                Spacer()
+                Button("Cancel") { dismiss() }
+                    .buttonStyle(.bordered)
+                    .buttonBorderShape(.capsule)
+                Button(role: .destructive) {
+                    removeEntry()
+                } label: {
+                    if deleting {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Text("Delete entry")
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.capsule)
+                .tint(TimeTheme.destructive)
+                .disabled(deleting || store.isMutating)
+            }
+        }
+        .padding(24)
+        .frame(maxWidth: 420)
+        .background(TimeTheme.popover)
+    }
+
+    private func removeEntry() {
+        deleting = true
+        Task {
+            let success = await store.deleteEntry(entry)
+            deleting = false
+            if success { dismiss() }
+        }
     }
 }
 

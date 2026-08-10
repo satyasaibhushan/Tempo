@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  applyActiveTimerEdit,
   canContinueEntry,
   createOptimisticTimer,
   elapsedWholeSeconds,
@@ -9,6 +10,42 @@ import {
   resumeOptimisticTimer,
   toWholeSecond,
 } from "./timer-state.ts";
+
+test("active timer edits preserve lifecycle state and retime only the first segment", () => {
+  const timer = {
+    title: "Old title",
+    notes: "Old notes",
+    folderId: "old-folder",
+    manualLabelIds: ["old-label"],
+    status: "running" as const,
+    segments: [
+      { startTime: 2_000, endTime: 5_000 },
+      { startTime: 8_000 },
+    ],
+    startedAt: 2_000,
+  };
+
+  const edited = applyActiveTimerEdit(timer, {
+    title: "New title",
+    notes: undefined,
+    folderId: undefined,
+    manualLabelIds: ["new-label"],
+    startTime: 1_000,
+  });
+
+  assert.deepEqual(edited, {
+    ...timer,
+    title: "New title",
+    notes: undefined,
+    folderId: undefined,
+    manualLabelIds: ["new-label"],
+    segments: [
+      { startTime: 1_000, endTime: 5_000 },
+      { startTime: 8_000 },
+    ],
+    startedAt: 1_000,
+  });
+});
 
 test("only completed entries can be continued", () => {
   assert.equal(canContinueEntry("completed"), true);

@@ -4,6 +4,7 @@ import { paginationOptsValidator } from "convex/server";
 import type { Doc } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 import { getCurrentUserOrThrow } from "./helpers";
+import { retimeActiveTimerSegments } from "./timeEntryLogic";
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -312,6 +313,63 @@ export const startTimer = mutation({
       createdAt: now,
       updatedAt: now,
     });
+  },
+});
+
+/** Edit a running or paused timer without changing its lifecycle state. */
+export const editActiveTimer = mutation({
+  args: {
+    entryId: v.id("timeEntries"),
+    title: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    folderId: v.optional(v.id("folders")),
+    clearFolder: v.optional(v.boolean()),
+    manualLabelIds: v.optional(v.array(v.id("labels"))),
+    startTime: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserOrThrow(ctx);
+    const entry = await ctx.db.get(args.entryId);
+
+    if (!entry || entry.userId !== user._id) {
+      throw new Error("Time entry not found");
+    }
+    if (entry.status === "completed") {
+      throw new Error("Only an active timer can be edited here");
+    }
+    if (args.folderId) {
+      const folder = await ctx.db.get(args.folderId);
+      if (!folder || folder.userId !== user._id) {
+        throw new Error("Folder not found");
+      }
+    }
+
+    const updates: Partial<Doc<"timeEntries">> = {
+      updatedAt: wholeSecondNow(),
+    };
+
+    if (args.title !== undefined) updates.title = args.title;
+    if (args.notes !== undefined) updates.notes = args.notes;
+    if (args.manualLabelIds !== undefined) {
+      updates.manualLabelIds = args.manualLabelIds;
+    }
+    if (args.folderId !== undefined) {
+      updates.folderId = args.folderId;
+    } else if (args.clearFolder) {
+      updates.folderId = undefined;
+    }
+    if (args.startTime !== undefined) {
+      const segments = retimeActiveTimerSegments(
+        entry.segments,
+        args.startTime,
+        Date.now(),
+      );
+      updates.segments = segments;
+      updates.startedAt = segments[0].startTime;
+    }
+
+    await ctx.db.patch(args.entryId, updates);
+    return args.entryId;
   },
 });
 
