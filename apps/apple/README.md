@@ -55,11 +55,13 @@ xcodegen generate
 open Time.xcodeproj
 ```
 
-Set `CONVEX_URL` in the Xcode scheme's runtime environment for local runs. The
-release packaging script embeds the same environment value into both Apple app
-bundles. Active timers, recent entries, folders, and labels update through live
-subscriptions; all native management actions call the existing Convex
-mutations. Synced data is also published to the widget App Group.
+Local Xcode builds read `CONVEX_URL` from the repository root's `.env.local`;
+CI and release builds may provide it through the build environment. A final
+build phase validates and embeds the value into both Apple app bundles, so an
+installed app never depends on Xcode's launch environment. Active timers,
+recent entries, folders, and labels update through live subscriptions; all
+native management actions call the existing Convex mutations. Synced data is
+also published to the widget App Group.
 
 ## Auth0 native application
 

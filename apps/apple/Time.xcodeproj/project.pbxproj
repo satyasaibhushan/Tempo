@@ -283,6 +283,7 @@
 				C9E90E4173B885ABC8759B39 /* Resources */,
 				EFE553569DD90899CD921A41 /* Frameworks */,
 				F6DAE2EC2953251299AF7400 /* Embed Foundation Extensions */,
+				A68EC8064334641237775A82 /* Embed runtime configuration */,
 			);
 			buildRules = (
 			);
@@ -307,6 +308,7 @@
 				EB85FEE0A421562302317315 /* Resources */,
 				B847F8A1E6D271F565CE8BDE /* Frameworks */,
 				3E992DEE8E3373781FB34C54 /* Embed Foundation Extensions */,
+				9239BE080A76F4FB475B91AA /* Embed runtime configuration */,
 			);
 			buildRules = (
 			);
@@ -370,6 +372,12 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					0360B6A2A34BE4FA520BF9EC = {
+						DevelopmentTeam = NPJKKT52N4;
+					};
+					9724F9EC36D359642E3E6DC1 = {
+						DevelopmentTeam = NPJKKT52N4;
+					};
 				};
 			};
 			buildConfigurationList = 7F9D5BF06A3AFD9F9C28EE3A /* Build configuration list for PBXProject "Time" */;
@@ -419,6 +427,47 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		9239BE080A76F4FB475B91AA /* Embed runtime configuration */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Embed runtime configuration";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/zsh\n\nset -euo pipefail\n\nrepo_root=\"$SRCROOT/../..\"\nconfig_url=\"${CONVEX_URL:-}\"\n\nif [[ -z \"$config_url\" || \"$config_url\" == '$('* ]]; then\n  env_file=\"$repo_root/.env.local\"\n\n  if [[ -f \"$env_file\" ]]; then\n    while IFS='=' read -r key value; do\n      if [[ \"$key\" == \"CONVEX_URL\" ]]; then\n        config_url=\"$value\"\n        break\n      fi\n    done < \"$env_file\"\n  fi\nfi\n\nconfig_url=\"${config_url#\\\"}\"\nconfig_url=\"${config_url%\\\"}\"\nconfig_url=\"${config_url#\\'}\"\nconfig_url=\"${config_url%\\'}\"\n\nif [[ \"$config_url\" != https://*.convex.cloud ]]; then\n  echo \"error: Set CONVEX_URL to an HTTPS convex.cloud deployment or add it to $repo_root/.env.local\" >&2\n  exit 1\nfi\n\napp_info=\"$TARGET_BUILD_DIR/$INFOPLIST_PATH\"\n\nif [[ ! -f \"$app_info\" ]]; then\n  echo \"error: Built app Info.plist is missing at $app_info\" >&2\n  exit 1\nfi\n\n/usr/libexec/PlistBuddy -c \"Set :ConvexURL $config_url\" \"$app_info\"\n\nembedded_url=\"$(/usr/libexec/PlistBuddy -c 'Print :ConvexURL' \"$app_info\")\"\n\nif [[ \"$embedded_url\" != \"$config_url\" ]]; then\n  echo \"error: Failed to embed CONVEX_URL in $app_info\" >&2\n  exit 1\nfi\n";
+		};
+		A68EC8064334641237775A82 /* Embed runtime configuration */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Embed runtime configuration";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/zsh\n\nset -euo pipefail\n\nrepo_root=\"$SRCROOT/../..\"\nconfig_url=\"${CONVEX_URL:-}\"\n\nif [[ -z \"$config_url\" || \"$config_url\" == '$('* ]]; then\n  env_file=\"$repo_root/.env.local\"\n\n  if [[ -f \"$env_file\" ]]; then\n    while IFS='=' read -r key value; do\n      if [[ \"$key\" == \"CONVEX_URL\" ]]; then\n        config_url=\"$value\"\n        break\n      fi\n    done < \"$env_file\"\n  fi\nfi\n\nconfig_url=\"${config_url#\\\"}\"\nconfig_url=\"${config_url%\\\"}\"\nconfig_url=\"${config_url#\\'}\"\nconfig_url=\"${config_url%\\'}\"\n\nif [[ \"$config_url\" != https://*.convex.cloud ]]; then\n  echo \"error: Set CONVEX_URL to an HTTPS convex.cloud deployment or add it to $repo_root/.env.local\" >&2\n  exit 1\nfi\n\napp_info=\"$TARGET_BUILD_DIR/$INFOPLIST_PATH\"\n\nif [[ ! -f \"$app_info\" ]]; then\n  echo \"error: Built app Info.plist is missing at $app_info\" >&2\n  exit 1\nfi\n\n/usr/libexec/PlistBuddy -c \"Set :ConvexURL $config_url\" \"$app_info\"\n\nembedded_url=\"$(/usr/libexec/PlistBuddy -c 'Print :ConvexURL' \"$app_info\")\"\n\nif [[ \"$embedded_url\" != \"$config_url\" ]]; then\n  echo \"error: Failed to embed CONVEX_URL in $app_info\" >&2\n  exit 1\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		0FCE5DFB0090D1D83C1FAA11 /* Sources */ = {
@@ -572,6 +621,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = Sources/TimeWidgets/TimeWidgets.entitlements;
+				DEVELOPMENT_TEAM = NPJKKT52N4;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Sources/TimeWidgets/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -632,6 +682,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = Sources/TimeWidgets/TimeWidgets.entitlements;
+				DEVELOPMENT_TEAM = NPJKKT52N4;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Sources/TimeWidgets/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -653,6 +704,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Sources/TimeApp/Time.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = NPJKKT52N4;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Sources/TimeApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -672,6 +725,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Sources/TimeApp/Time.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = NPJKKT52N4;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Sources/TimeApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -691,6 +746,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Sources/TimeMacApp/TempoMac.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Sources/TimeMacApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -768,6 +824,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Sources/TimeMacApp/TempoMac.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Sources/TimeMacApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
