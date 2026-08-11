@@ -2,6 +2,30 @@ import Foundation
 import Testing
 @testable import TimeCore
 
+@Test func cachedIDTokenMustOutliveTheAuthenticationWindow() {
+    let token = "header.eyJleHAiOjEwMDB9.signature"
+
+    #expect(
+        IDTokenLifetime.isUsable(
+            token,
+            at: Date(timeIntervalSince1970: 900),
+            minimumTTL: 60
+        )
+    )
+    #expect(
+        !IDTokenLifetime.isUsable(
+            token,
+            at: Date(timeIntervalSince1970: 950),
+            minimumTTL: 60
+        )
+    )
+}
+
+@Test func malformedOrClaimlessIDTokensAreRejected() {
+    #expect(!IDTokenLifetime.isUsable("not-a-jwt"))
+    #expect(!IDTokenLifetime.isUsable("header.e30.signature"))
+}
+
 @Test func wholeSecondUsesTheSharedWallClockBoundary() {
     #expect(TimerMath.wholeSecond(12_999) == 12_000)
     #expect(TimerMath.wholeSecond(13_000) == 13_000)

@@ -1,6 +1,7 @@
 import Auth0
 import ConvexMobile
 import Foundation
+import TimeCore
 #if os(macOS)
 import AppKit
 #endif
@@ -27,10 +28,23 @@ final class TempoAuthProvider: AuthProvider {
 
     func loginFromCache(onIdToken: @escaping @Sendable (String?) -> Void) async throws -> Credentials {
         do {
-            let credentials = try await credentialsManager.credentials()
+            var credentials = try await credentialsManager.credentials(minTTL: 60)
+
+            if !IDTokenLifetime.isUsable(credentials.idToken) {
+                guard credentials.refreshToken != nil else {
+                    throw CachedSessionError.expiredIDToken
+                }
+                credentials = try await credentialsManager.renew()
+            }
+
+            guard IDTokenLifetime.isUsable(credentials.idToken) else {
+                throw CachedSessionError.expiredIDToken
+            }
+
             onIdToken(credentials.idToken)
             return credentials
         } catch {
+            _ = credentialsManager.clear()
             onIdToken(nil)
             throw error
         }
@@ -42,6 +56,14 @@ final class TempoAuthProvider: AuthProvider {
 
     func logout() async throws {
         _ = credentialsManager.clear()
+    }
+}
+
+private enum CachedSessionError: LocalizedError {
+    case expiredIDToken
+
+    var errorDescription: String? {
+        "Your session expired. Please sign in again."
     }
 }
 
