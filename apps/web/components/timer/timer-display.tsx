@@ -1,6 +1,6 @@
 "use client";
 
-import { formatDurationClock } from "@time/shared";
+import { formatDurationClock } from "@tempo/shared";
 import { cn } from "@/lib/utils";
 import { elapsedWholeSeconds, type TimerSegment } from "@/lib/timer-state";
 import { useWholeSecondClock } from "@/lib/whole-second-clock";

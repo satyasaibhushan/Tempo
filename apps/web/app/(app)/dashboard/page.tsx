@@ -4,7 +4,7 @@ import { useQuery } from "convex/react";
 import { format } from "date-fns";
 
 import { api } from "@convex/_generated/api";
-import { formatDurationClock } from "@time/shared";
+import { formatDurationClock } from "@tempo/shared";
 import { EntryCard } from "@/components/entries/entry-card";
 import { WeekChart } from "@/components/dashboard/week-chart";
 import { MonthSummary } from "@/components/dashboard/month-summary";

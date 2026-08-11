@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { format, isToday, isYesterday, startOfDay } from "date-fns";
 
-import { formatDurationClock } from "@time/shared";
+import { formatDurationClock } from "@tempo/shared";
 import { LoadingState, EmptyState } from "@/components/states";
 import { EntryCard } from "./entry-card";
 import type { TimeEntryDoc, FolderDoc, LabelDoc } from "./entry-card";

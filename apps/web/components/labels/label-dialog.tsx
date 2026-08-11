@@ -6,7 +6,7 @@ import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { LABEL_COLOR_TOKENS, DEFAULT_LABEL_COLOR } from "@time/shared";
+import { LABEL_COLOR_TOKENS, DEFAULT_LABEL_COLOR } from "@tempo/shared";
 import {
   Dialog,
   DialogContent,

@@ -9,9 +9,9 @@ app_path="$archive_path/Products/Applications/Tempo.app"
 widget_path="$app_path/Contents/PlugIns/TempoMacWidgets.appex"
 app_info="$app_path/Contents/Info.plist"
 widget_info="$widget_path/Contents/Info.plist"
-app_entitlements="$repo_root/apps/apple/Sources/TimeMacApp/TempoMac.entitlements"
-widget_entitlements="$repo_root/apps/apple/Sources/TimeMacWidgets/TempoMacWidgets.entitlements"
-local_widget_preference_suite="fun.bhushan.time.widget-shared"
+app_entitlements="$repo_root/apps/apple/Sources/TempoMacApp/TempoMac.entitlements"
+widget_entitlements="$repo_root/apps/apple/Sources/TempoMacWidgets/TempoMacWidgets.entitlements"
+local_widget_preference_suite="fun.bhushan.tempo.widget-shared"
 local_widget_entitlements="$(mktemp "${RUNNER_TEMP:-/tmp}/TempoMacWidgets.XXXXXX")"
 
 trap 'rm -f "$local_widget_entitlements"' EXIT
@@ -27,7 +27,7 @@ cd "$repo_root"
 rm -rf "$archive_path" "$output_path"
 
 xcodebuild -quiet \
-  -project apps/apple/Time.xcodeproj \
+  -project apps/apple/Tempo.xcodeproj \
   -scheme TempoMac \
   -configuration Release \
   -destination "generic/platform=macOS" \

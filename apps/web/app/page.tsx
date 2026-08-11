@@ -112,6 +112,14 @@ export default async function Home() {
                   one shared clock. Built for personal use.
                 </p>
               </div>
+              <div className="mt-4 flex gap-4 text-[10px] font-semibold text-[var(--terra-sage)]">
+                <a className="hover:text-[var(--terra-pine)] hover:underline" href="/privacy">
+                  Privacy
+                </a>
+                <a className="hover:text-[var(--terra-pine)] hover:underline" href="/support">
+                  Support
+                </a>
+              </div>
             </div>
           </aside>
         </div>

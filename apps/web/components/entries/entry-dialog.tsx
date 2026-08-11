@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { FOLDER_COLOR_TOKENS, LABEL_COLOR_TOKENS } from "@time/shared";
+import { FOLDER_COLOR_TOKENS, LABEL_COLOR_TOKENS } from "@tempo/shared";
 import {
   Dialog,
   DialogContent,

@@ -5,7 +5,7 @@ import { useQuery } from "convex/react";
 
 import { api } from "@convex/_generated/api";
 import type { Doc } from "@convex/_generated/dataModel";
-import { FOLDER_COLOR_TOKENS, LABEL_COLOR_TOKENS, formatDurationClock } from "@time/shared";
+import { FOLDER_COLOR_TOKENS, LABEL_COLOR_TOKENS, formatDurationClock } from "@tempo/shared";
 import {
   effectiveLabelIds,
   entryDurationSeconds,

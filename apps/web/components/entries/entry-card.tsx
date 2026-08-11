@@ -6,8 +6,8 @@ import { Play, Pencil, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 
 import { cn } from "@/lib/utils";
-import { formatDurationClock } from "@time/shared";
-import { FOLDER_COLOR_TOKENS, LABEL_COLOR_TOKENS } from "@time/shared";
+import { formatDurationClock } from "@tempo/shared";
+import { FOLDER_COLOR_TOKENS, LABEL_COLOR_TOKENS } from "@tempo/shared";
 import { Button } from "@/components/ui/button";
 import { EntryDeleteDialog } from "./entry-delete-dialog";
 import { useTimerController } from "@/components/timer/timer-controller";

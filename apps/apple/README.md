@@ -1,7 +1,7 @@
-# Time for Apple Platforms
+# Tempo for Apple Platforms
 
 Native development includes SwiftUI iPhone and macOS applications plus the
-shared `TimeCore` package. The core mirrors the production Convex domain model
+shared `TempoCore` package. The core mirrors the production Convex domain model
 and keeps timer behavior independent from presentation code.
 
 ## Current foundation
@@ -52,7 +52,7 @@ Generate and open the Apple project:
 
 ```bash
 xcodegen generate
-open Time.xcodeproj
+open Tempo.xcodeproj
 ```
 
 Local Xcode builds read `CONVEX_URL` from the repository root's `.env.local`;
@@ -72,17 +72,17 @@ Configure the Native application with all four of these values:
 
 ```text
 Allowed Callback URLs:
-fun.bhushan.time://dev-2eahmbvpb8dc1wei.jp.auth0.com/ios/fun.bhushan.time/callback
-fun.bhushan.time://dev-2eahmbvpb8dc1wei.jp.auth0.com/macos/fun.bhushan.time/callback
+fun.bhushan.tempo://dev-2eahmbvpb8dc1wei.jp.auth0.com/ios/fun.bhushan.tempo/callback
+fun.bhushan.tempo://dev-2eahmbvpb8dc1wei.jp.auth0.com/macos/fun.bhushan.tempo/callback
 
 Allowed Logout URLs:
-fun.bhushan.time://dev-2eahmbvpb8dc1wei.jp.auth0.com/ios/fun.bhushan.time/callback
-fun.bhushan.time://dev-2eahmbvpb8dc1wei.jp.auth0.com/macos/fun.bhushan.time/callback
+fun.bhushan.tempo://dev-2eahmbvpb8dc1wei.jp.auth0.com/ios/fun.bhushan.tempo/callback
+fun.bhushan.tempo://dev-2eahmbvpb8dc1wei.jp.auth0.com/macos/fun.bhushan.tempo/callback
 ```
 
 Then:
 
-1. Put its public Client ID in `Sources/TimeApp/Auth0.plist`.
+1. Put its public Client ID in `Sources/TempoApp/Auth0.plist`.
 2. Add `AUTH0_NATIVE_CLIENT_ID` with the same value to every Convex environment
    used by an Apple build, including development and production.
 3. Deploy the Convex auth configuration to each environment.
@@ -96,8 +96,8 @@ timers and entries.
 ## Widgets
 
 The apps and widget extensions share data through the
-`group.fun.bhushan.time` App Group. Add that App Group capability to the
-`Time`, `TempoMac`, `TimeWidgets`, and `TempoMacWidgets` identifiers in the
+`group.fun.bhushan.tempo` App Group. Add that App Group capability to the
+`Tempo`, `TempoMac`, `TempoWidgets`, and `TempoMacWidgets` identifiers in the
 Apple Developer portal before a device or release build. Simulator SDK builds
 work without signing.
 

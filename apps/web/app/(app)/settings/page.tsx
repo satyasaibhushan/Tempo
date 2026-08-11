@@ -6,7 +6,9 @@ import { api } from "@convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LoadingState } from "@/components/states";
-import { Check, Loader2, Pencil, X } from "lucide-react";
+import { Check, ExternalLink, Loader2, Pencil, Trash2, X } from "lucide-react";
+
+import { AccountDeleteDialog } from "@/components/account-delete-dialog";
 
 export default function SettingsPage() {
   const user = useQuery(api.users.current, {});
@@ -27,6 +29,7 @@ export default function SettingsPage() {
   const [weekStart, setWeekStart] = useState<"monday" | "sunday">("monday");
   const [timeFormat, setTimeFormat] = useState<"12h" | "24h">("24h");
   const [prefsSaving, setPrefsSaving] = useState(false);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
 
   // Sync form state from server data
   useEffect(() => {
@@ -341,7 +344,7 @@ export default function SettingsPage() {
                 Provider
               </div>
               <div className="mt-1 text-sm text-[var(--terra-pine)]">
-                Auth0 (Google + Email)
+                Auth0 (Apple + Google + Email)
               </div>
             </div>
             <a
@@ -351,8 +354,50 @@ export default function SettingsPage() {
               Log out
             </a>
           </div>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <div className="flex items-center justify-between rounded-2xl border border-[var(--border)] bg-[var(--muted)]/50 px-4 py-4">
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--terra-sage)]">
+                  Legal &amp; support
+                </div>
+                <div className="mt-1 flex gap-4 text-sm">
+                  <a className="inline-flex items-center gap-1 hover:underline" href="/privacy">
+                    Privacy <ExternalLink className="size-3" />
+                  </a>
+                  <a className="inline-flex items-center gap-1 hover:underline" href="/support">
+                    Support <ExternalLink className="size-3" />
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-4 rounded-2xl border border-[var(--destructive)]/25 bg-[var(--destructive)]/5 px-4 py-4">
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--destructive)]">
+                  Danger zone
+                </div>
+                <div className="mt-1 text-sm text-[var(--terra-sage)]">
+                  Permanently remove this account and its data.
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteAccount(true)}
+                className="shrink-0 gap-2 border-[var(--destructive)]/30 text-[var(--destructive)] hover:bg-[var(--destructive)]/10"
+              >
+                <Trash2 className="size-4" />
+                Delete account
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
+
+      <AccountDeleteDialog
+        open={showDeleteAccount}
+        onOpenChange={setShowDeleteAccount}
+      />
     </section>
   );
 }

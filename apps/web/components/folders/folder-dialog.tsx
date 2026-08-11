@@ -5,7 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import type { Id, Doc } from "@convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
-import { FOLDER_COLOR_TOKENS, DEFAULT_FOLDER_COLOR } from "@time/shared";
+import { FOLDER_COLOR_TOKENS, DEFAULT_FOLDER_COLOR } from "@tempo/shared";
 import {
   Dialog,
   DialogContent,

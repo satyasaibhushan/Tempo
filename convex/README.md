@@ -14,6 +14,8 @@ Planned Convex environment variables:
 AUTH0_DOMAIN=
 AUTH0_CLIENT_ID=
 AUTH0_NATIVE_CLIENT_ID=
+AUTH0_MANAGEMENT_CLIENT_ID=
+AUTH0_MANAGEMENT_CLIENT_SECRET=
 ```
 
 Notes:
@@ -22,5 +24,7 @@ Notes:
 - `apps/web/.env.local` is for Next.js runtime configuration and Auth0 web envs.
 - `AUTH0_CLIENT_ID` identifies the Auth0 web application; `AUTH0_NATIVE_CLIENT_ID`
   identifies the separate public Native application used by Apple clients.
+- The Auth0 Management client is server-only and must have only the
+  `delete:users` scope. It powers the in-app account deletion flow.
 - Convex secrets live in the Convex deployment, not in the repository.
 - Variable names should stay aligned between the web app and Convex where possible.

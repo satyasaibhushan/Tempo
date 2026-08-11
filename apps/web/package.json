@@ -1,11 +1,11 @@
 {
-  "name": "@time/web",
+  "name": "@tempo/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev --port 3003",
     "build": "next build",
-    "vercel-build": "pnpm --dir ../.. exec convex deploy --cmd-url-env-var-name NEXT_PUBLIC_CONVEX_URL --cmd 'pnpm --filter @time/web build'",
+    "vercel-build": "pnpm --dir ../.. exec convex deploy --cmd-url-env-var-name NEXT_PUBLIC_CONVEX_URL --cmd 'pnpm --filter @tempo/web build'",
     "start": "next start --port 3003",
     "lint": "eslint .",
     "test:mvp": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test lib/*.test.ts",
@@ -14,7 +14,7 @@
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.16.0",
     "@base-ui/react": "^1.2.0",
-    "@time/shared": "workspace:*",
+    "@tempo/shared": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

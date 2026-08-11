@@ -7,7 +7,7 @@ import type { Id } from "@convex/_generated/dataModel";
 import { FolderIcon, InboxIcon, ChevronDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { FOLDER_COLOR_TOKENS } from "@time/shared";
+import { FOLDER_COLOR_TOKENS } from "@tempo/shared";
 import {
   Popover,
   PopoverContent,

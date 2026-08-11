@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 import type { Doc, Id } from "@convex/_generated/dataModel";
-import { FOLDER_COLOR_TOKENS, LABEL_COLOR_TOKENS } from "@time/shared";
+import { FOLDER_COLOR_TOKENS, LABEL_COLOR_TOKENS } from "@tempo/shared";
 import {
   Command,
   CommandEmpty,

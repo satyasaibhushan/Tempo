@@ -3,16 +3,20 @@
 import PackageDescription
 
 let package = Package(
-    name: "TimeApple",
+    name: "TempoApple",
     platforms: [
         .iOS(.v17),
         .macOS(.v14),
     ],
     products: [
-        .library(name: "TimeCore", targets: ["TimeCore"]),
+        .library(name: "TempoCore", targets: ["TempoCore"]),
     ],
     targets: [
-        .target(name: "TimeCore"),
-        .testTarget(name: "TimeCoreTests", dependencies: ["TimeCore"]),
+        .target(name: "TempoCore", path: "Sources/TempoCore"),
+        .testTarget(
+            name: "TempoCoreTests",
+            dependencies: ["TempoCore"],
+            path: "Tests/TempoCoreTests"
+        ),
     ]
 )

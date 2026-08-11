@@ -7,7 +7,7 @@ import type { Id } from "@convex/_generated/dataModel";
 import { TagIcon, ChevronDown, Check } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { LABEL_COLOR_TOKENS } from "@time/shared";
+import { LABEL_COLOR_TOKENS } from "@tempo/shared";
 import {
   Popover,
   PopoverContent,

@@ -5,7 +5,7 @@ import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { AlertTriangle } from "lucide-react";
 
-import { formatDurationClock } from "@time/shared";
+import { formatDurationClock } from "@tempo/shared";
 import {
   Dialog,
   DialogContent,

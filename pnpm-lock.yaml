@@ -27,7 +27,7 @@ importers:
       '@base-ui/react':
         specifier: ^1.2.0
         version: 1.2.0(@types/react@19.2.14)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@time/shared':
+      '@tempo/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       class-variance-authority:

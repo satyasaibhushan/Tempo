@@ -1,4 +1,4 @@
-name: Time
+name: Tempo
 
 options:
   createIntermediateGroups: true
@@ -7,7 +7,7 @@ options:
     macOS: "14.0"
 
 packages:
-  TimeApple:
+  TempoApple:
     path: .
   ConvexMobile:
     url: https://github.com/get-convex/convex-swift
@@ -19,35 +19,35 @@ packages:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    CURRENT_PROJECT_VERSION: 11
+    CURRENT_PROJECT_VERSION: 12
     MARKETING_VERSION: 0.1.0
     "EXCLUDED_ARCHS[sdk=iphonesimulator*]": x86_64
 
 targets:
-  Time:
+  Tempo:
     type: application
     platform: iOS
     sources:
-      - path: Sources/TimeApp
+      - path: Sources/TempoApp
       - path: Sources/SharedAssets/Assets.xcassets
         buildPhase: resources
     dependencies:
-      - package: TimeApple
-        product: TimeCore
+      - package: TempoApple
+        product: TempoCore
       - package: ConvexMobile
         product: ConvexMobile
       - package: Auth0
         product: Auth0
-      - target: TimeWidgets
+      - target: TempoWidgets
         embed: true
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: fun.bhushan.time
-        PRODUCT_NAME: Time
+        PRODUCT_BUNDLE_IDENTIFIER: fun.bhushan.tempo
+        PRODUCT_NAME: Tempo
         DEVELOPMENT_TEAM: NPJKKT52N4
-        CODE_SIGN_ENTITLEMENTS: Sources/TimeApp/Time.entitlements
+        CODE_SIGN_ENTITLEMENTS: Sources/TempoApp/Tempo.entitlements
         GENERATE_INFOPLIST_FILE: false
-        INFOPLIST_FILE: Sources/TimeApp/Info.plist
+        INFOPLIST_FILE: Sources/TempoApp/Info.plist
         TARGETED_DEVICE_FAMILY: "1"
         ENABLE_USER_SCRIPT_SANDBOXING: false
     postBuildScripts:
@@ -57,41 +57,42 @@ targets:
     scheme:
       gatherCoverageData: false
 
-  TimeWidgets:
+  TempoWidgets:
     type: app-extension
     platform: iOS
     sources:
-      - path: Sources/TimeWidgets
+      - path: Sources/TempoWidgets
     dependencies:
-      - package: TimeApple
-        product: TimeCore
+      - package: TempoApple
+        product: TempoCore
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: fun.bhushan.time.widgets
-        PRODUCT_NAME: TimeWidgets
+        PRODUCT_BUNDLE_IDENTIFIER: fun.bhushan.tempo.widgets
+        PRODUCT_NAME: TempoWidgets
         DEVELOPMENT_TEAM: NPJKKT52N4
-        INFOPLIST_FILE: Sources/TimeWidgets/Info.plist
+        INFOPLIST_FILE: Sources/TempoWidgets/Info.plist
         GENERATE_INFOPLIST_FILE: false
-        CODE_SIGN_ENTITLEMENTS: Sources/TimeWidgets/TimeWidgets.entitlements
+        CODE_SIGN_ENTITLEMENTS: Sources/TempoWidgets/TempoWidgets.entitlements
         APPLICATION_EXTENSION_API_ONLY: true
         SKIP_INSTALL: true
+        TARGETED_DEVICE_FAMILY: "1"
 
   TempoMac:
     type: application
     platform: macOS
     sources:
-      - path: Sources/TimeApp
+      - path: Sources/TempoApp
         excludes:
           - AppRootView.swift
           - Info.plist
-          - Time.entitlements
-          - TimeApp.swift
-      - path: Sources/TimeMacApp
+          - Tempo.entitlements
+          - TempoApp.swift
+      - path: Sources/TempoMacApp
       - path: Sources/SharedAssets/Assets.xcassets
         buildPhase: resources
     dependencies:
-      - package: TimeApple
-        product: TimeCore
+      - package: TempoApple
+        product: TempoCore
       - package: ConvexMobile
         product: ConvexMobile
       - package: Auth0
@@ -100,11 +101,12 @@ targets:
         embed: true
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: fun.bhushan.time
+        PRODUCT_BUNDLE_IDENTIFIER: fun.bhushan.tempo
         PRODUCT_NAME: Tempo
-        CODE_SIGN_ENTITLEMENTS: Sources/TimeMacApp/TempoMac.entitlements
+        DEVELOPMENT_TEAM: NPJKKT52N4
+        CODE_SIGN_ENTITLEMENTS: Sources/TempoMacApp/TempoMac.entitlements
         GENERATE_INFOPLIST_FILE: false
-        INFOPLIST_FILE: Sources/TimeMacApp/Info.plist
+        INFOPLIST_FILE: Sources/TempoMacApp/Info.plist
         ENABLE_USER_SCRIPT_SANDBOXING: false
     postBuildScripts:
       - name: Embed runtime configuration
@@ -117,19 +119,20 @@ targets:
     type: app-extension
     platform: macOS
     sources:
-      - path: Sources/TimeWidgets
+      - path: Sources/TempoWidgets
         excludes:
           - Info.plist
-          - TimeWidgets.entitlements
+          - TempoWidgets.entitlements
     dependencies:
-      - package: TimeApple
-        product: TimeCore
+      - package: TempoApple
+        product: TempoCore
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: fun.bhushan.time.macwidgets
+        PRODUCT_BUNDLE_IDENTIFIER: fun.bhushan.tempo.macwidgets
         PRODUCT_NAME: TempoMacWidgets
-        INFOPLIST_FILE: Sources/TimeMacWidgets/Info.plist
+        DEVELOPMENT_TEAM: NPJKKT52N4
+        INFOPLIST_FILE: Sources/TempoMacWidgets/Info.plist
         GENERATE_INFOPLIST_FILE: false
-        CODE_SIGN_ENTITLEMENTS: Sources/TimeMacWidgets/TempoMacWidgets.entitlements
+        CODE_SIGN_ENTITLEMENTS: Sources/TempoMacWidgets/TempoMacWidgets.entitlements
         APPLICATION_EXTENSION_API_ONLY: true
         SKIP_INSTALL: true

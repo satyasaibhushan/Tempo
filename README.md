@@ -1,4 +1,4 @@
-# Time
+# Tempo
 
 The Web MVP and native iOS app share the same Convex backend and Auth0 identity
 model. Native macOS development uses the same SwiftUI feature layer and timer
@@ -46,7 +46,7 @@ For local Auth0 setup, register these URLs in your Auth0 application:
 
 1. Deploy the Next.js web app and Convex backend.
 2. Run the production smoke test.
-3. Build and QA the native iOS and macOS targets from `apps/apple/Time.xcodeproj`.
+3. Build and QA the native iOS and macOS targets from `apps/apple/Tempo.xcodeproj`.
 
 ## Production Deployment
 

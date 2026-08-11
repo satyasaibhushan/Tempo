@@ -1,12 +1,12 @@
 {
-  "name": "time",
+  "name": "tempo",
   "private": true,
   "packageManager": "pnpm@10.30.0",
   "scripts": {
-    "dev": "pnpm --filter @time/web dev",
-    "build": "pnpm --filter @time/web build",
-    "lint": "pnpm --filter @time/web lint",
-    "typecheck": "pnpm --filter @time/shared exec tsc --noEmit && pnpm --filter @time/web exec tsc --noEmit && pnpm exec tsc --project convex/tsconfig.json --noEmit",
+    "dev": "pnpm --filter @tempo/web dev",
+    "build": "pnpm --filter @tempo/web build",
+    "lint": "pnpm --filter @tempo/web lint",
+    "typecheck": "pnpm --filter @tempo/shared exec tsc --noEmit && pnpm --filter @tempo/web exec tsc --noEmit && pnpm exec tsc --project convex/tsconfig.json --noEmit",
     "convex:dev": "convex dev",
     "convex:codegen": "convex dev --once"
   },
