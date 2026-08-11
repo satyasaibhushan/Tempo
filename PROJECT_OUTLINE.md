@@ -1,4 +1,4 @@
-# Time Tracking App - Project Outline
+# Tempo - Project Outline
 
 ## Project Overview
 A personal-use time tracking application with a web-first MVP and a backend designed from day one for future iOS and macOS apps. The product should feel like a focused Timery/Toggl-style tracker for one user, with reliable timers, tags, folders and sub-folders, and real-time sync across platforms once the Apple apps are added.
@@ -247,7 +247,7 @@ A personal-use time tracking application with a web-first MVP and a backend desi
 
 ### Future Apple App Areas
 ```text
-/Time
+/Tempo
   /Models
   /Views
   /ViewModels

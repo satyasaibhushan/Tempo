@@ -129,14 +129,14 @@ export function AppShell({
             <div className="lg:mt-auto lg:flex lg:flex-col lg:gap-3">
               <div className="grid grid-cols-2 gap-1 rounded-[14px] border border-[var(--border)] bg-[var(--secondary)] p-1">
                 <a
-                  href="https://github.com/satyasaibhushan/Time/releases/latest/download/Tempo.zip"
+                  href="https://github.com/satyasaibhushan/Tempo/releases/latest/download/Tempo.zip"
                   className="flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-[10px] bg-[var(--card)] text-[11px] font-semibold text-[var(--terra-pine)] transition-colors hover:bg-[var(--popover)]"
                 >
                   <Download className="size-3.5" />
                   Mac app
                 </a>
                 <a
-                  href="https://github.com/satyasaibhushan/Time"
+                  href="https://github.com/satyasaibhushan/Tempo"
                   target="_blank"
                   rel="noreferrer"
                   className="flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-[10px] text-[11px] font-semibold text-[var(--terra-pine)] transition-colors hover:bg-[var(--card)]"

@@ -82,14 +82,14 @@ export default async function Home() {
 
                 <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] gap-3">
                   <a
-                    href="https://github.com/satyasaibhushan/Time/releases/latest/download/Tempo.zip"
+                    href="https://github.com/satyasaibhushan/Tempo/releases/latest/download/Tempo.zip"
                     className="flex h-12 items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 text-xs font-semibold text-[var(--terra-pine)] transition-colors hover:bg-[var(--secondary)]"
                   >
                     Download for Mac
                     <Download className="size-4" />
                   </a>
                   <a
-                    href="https://github.com/satyasaibhushan/Time"
+                    href="https://github.com/satyasaibhushan/Tempo"
                     target="_blank"
                     rel="noreferrer"
                     aria-label="View Tempo on GitHub"

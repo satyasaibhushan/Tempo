@@ -1,4 +1,4 @@
-# Time Tracking App - Development Tasks
+# Tempo - Development Tasks
 
 ## Task Management Guide
 - Each task has an estimated complexity: `[Easy]`, `[Medium]`, `[Hard]`
