@@ -2,7 +2,9 @@
 
 ## Identity
 
-- App name: Tempo
+- App Store name: Tempo: Focus Time Tracker
+- Product and device display name: Tempo
+- App Store Connect ID: `6800333437`
 - Subtitle: Personal time, made visible
 - Primary category: Productivity
 - Secondary category: Utilities
