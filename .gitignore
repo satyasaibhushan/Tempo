@@ -9,6 +9,9 @@
 # testing
 /coverage
 
+# local App Review evidence
+/.artifacts/
+
 # next.js
 /.next/
 **/.next/

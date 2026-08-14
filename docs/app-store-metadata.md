@@ -60,6 +60,16 @@ The app supports iPhone. The embedded widget extension intentionally declares th
 
 Reviewer credentials must be added in App Store Connect immediately before submission and must remain active throughout review.
 
+Target audience: individuals, students, freelancers, and knowledge workers who want a private record of how they spend their time. Tempo supports concurrent timers, editable active sessions, completed entries, folders, labels, summaries, and cross-device synchronization.
+
+Access instructions: launch Tempo, choose Continue to Tempo, and use the reviewer credentials in App Store Connect. No sample files, purchase, or subscription are required. The Now tab contains the main timer flow; account deletion is under Setup.
+
+External services: Auth0 provides Apple, Google, and email authentication. Convex provides application data storage and live synchronization. Tempo does not use payment processors, advertising, analytics, or AI services for its core functionality.
+
+Tempo has the same functionality in every region. It has no paid content, public user-generated content, content reporting or blocking features, sensitive device permission prompts, regulated services, or protected third-party material.
+
+Before every submission, add a public screen-recording URL and the physical iPhone model and current iOS version used for the final test. The recording must begin with a fresh app launch and demonstrate authentication, starting, editing, pausing, resuming and stopping a timer, viewing the log, adding a widget, and the account-deletion flow.
+
 ## App privacy answers
 
 Tempo does not track users and does not use data for third-party advertising, developer advertising, or marketing.

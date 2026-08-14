@@ -108,6 +108,7 @@ targets:
         GENERATE_INFOPLIST_FILE: false
         INFOPLIST_FILE: Sources/TempoMacApp/Info.plist
         ENABLE_USER_SCRIPT_SANDBOXING: false
+        "EXCLUDED_ARCHS[sdk=macosx*]": x86_64
     postBuildScripts:
       - name: Embed runtime configuration
         path: Scripts/embed-runtime-config.sh
@@ -136,3 +137,4 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Sources/TempoMacWidgets/TempoMacWidgets.entitlements
         APPLICATION_EXTENSION_API_ONLY: true
         SKIP_INSTALL: true
+        "EXCLUDED_ARCHS[sdk=macosx*]": x86_64
