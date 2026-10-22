@@ -8,6 +8,31 @@ import { api } from "@convex/_generated/api";
 
 export function CurrentUserBootstrap({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useConvexAuth();
+  return (
+    <ProvisionedUser isAuthenticated={isAuthenticated} isLoading={isLoading}>
+      {children}
+    </ProvisionedUser>
+  );
+}
+
+// Demo mode has no Auth0 session: the Convex client is already acting as the demo identity.
+export function DemoCurrentUserBootstrap({ children }: { children: ReactNode }) {
+  return (
+    <ProvisionedUser isAuthenticated isLoading={false}>
+      {children}
+    </ProvisionedUser>
+  );
+}
+
+function ProvisionedUser({
+  children,
+  isAuthenticated,
+  isLoading,
+}: {
+  children: ReactNode;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+}) {
   const currentUser = useQuery(api.users.current, isAuthenticated ? {} : "skip");
   const ensureCurrentUser = useMutation(api.users.ensureCurrentUser);
   const hasProvisionedRef = useRef(false);

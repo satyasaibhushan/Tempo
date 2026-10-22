@@ -9,9 +9,10 @@ import {
 } from "lucide-react";
 
 import { auth0 } from "@/lib/auth0";
+import { demoSession } from "@/lib/demo";
 
 export default async function Home() {
-  const session = await auth0.getSession();
+  const session = demoSession ?? (await auth0.getSession());
 
   if (session) redirect("/dashboard");
 
@@ -49,6 +50,23 @@ export default async function Home() {
                 A focused personal clock for honest sessions, clean history, and
                 enough structure to find the pattern later.
               </p>
+              <figure className="mt-10 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]">
+                <video
+                  className="block w-full"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  poster="/demo/poster.png"
+                  aria-label="Tempo demo: a session is started, paused, resumed and stopped on the Now page, then appears in the log"
+                >
+                  <source src="/demo/demo.webm" type="video/webm" />
+                  <source src="/demo/demo.mp4" type="video/mp4" />
+                </video>
+                <figcaption className="px-4 py-2.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-[var(--terra-sage)]">
+                  Recorded from the web app with a fictional account
+                </figcaption>
+              </figure>
             </div>
           </section>
 

@@ -3,6 +3,7 @@ import "./globals.css";
 
 import { AppProviders } from "@/components/providers";
 import { auth0 } from "@/lib/auth0";
+import { demoSession } from "@/lib/demo";
 
 export const metadata: Metadata = {
   title: "Tempo",
@@ -14,7 +15,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth0.getSession();
+  const session = demoSession ?? (await auth0.getSession());
 
   return (
     <html lang="en" className="font-sans">
