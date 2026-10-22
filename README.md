@@ -65,8 +65,9 @@ For local Auth0 setup, register these URLs in your Auth0 application:
 ## Local demo
 
 Demo mode replaces Auth0 with one fixed fictional account (`apps/web/lib/demo.ts`). It turns on only when
-`NEXT_PUBLIC_TEMPO_DEMO=1` and the Convex URL is local, and it authorises the Convex client with the local
-deployment's admin key acting as that identity, so every page, query, and mutation is the real one. The scripts in
+`NEXT_PUBLIC_TEMPO_DEMO=1` and the Convex URL is loopback, and it authorises the Convex client with the local
+deployment's admin key acting as that identity, so every page, query, and mutation is the real one.
+`apps/web/next.config.ts` fails any build that sets either demo variable on Vercel or with a non-loopback Convex URL. The scripts in
 `scripts/demo/` need no Convex account: `npx convex dev` in anonymous mode runs a local backend.
 
 ```bash
